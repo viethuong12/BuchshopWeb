@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</head>
+
+<body>
+
+    <div id="app" class="container" style=" font-family: 'Times New Roman', Times, serif;">
+        <div class="" style="">
+            <nav class="navbar navbar-expand-sm navbar-dark" style="background-color: #2F4F4F; font-size: 1.5em;">
+                <header role="banner">
+                    <h1 class="navbar-brand" href="#">EWA-Group5</h1>
+                </header>
+
+
+                <!-- Links -->
+                <ul class=" navbar-nav mr-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="./katalog.html">Katalog  </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="./überuns.html">Über uns</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav pr-0 ml-auto ">
+
+                    <li class="nav-item ">
+                        <a class="nav-link" href="#"></a>
+                        <div class="dropdown">
+                            <button class="btn dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size:0.7em;background-color: #637b7b;">
+                                Warenkorb
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <div class="item d-flex justify-content-between" v-for="book in books">
+                                    <div v-if="book.quantity > 0">
+                                        <p>{{book.Produkttitel}}, {{book.quantity}}, {{book.PreisBrutto}}€/item</p>
+                                    </div>
+                                </div>
+                                <button v-on:click="menuToCart()">Go to Cart</button>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+
+            </nav>
+
+        </div>
+        <div class="content" style="position: relative;">
+            <div class="catalog container" style="position: absolute;font-size:1.5em;background-color:  #b6c1c1;" :style="isCatalog">
+                <section>
+                    <h2>Catalogue</h2>
+                    <div class="search">
+                        <form class="" action="#">
+                            <label for="">Search: </label>
+                            <input type="text" class="search-bg" v-model="search" @keyup="searchData" />
+                        </form>
+                    </div>
+                    <div class="book border" v-for="book in bookstore">
+                        <div class="row m-0" style="border: 2px  #6d8484 outset;">
+                            <div class=" img col-md-2 border d-flex ">
+                                <img v-bind:src="book.LinkGrafikdatei" alt="" style="height: 75%;width: 75%; margin: 0 auto">
+                            </div>
+                            <div class="title col-md-6 border  ">
+                                <p>{{book.Produkttitel}}</p>
+                            </div>
+                            <div class="price col-md-2 border">
+                                <p>{{book.PreisBrutto}}€</p>
+                            </div>
+                            <div class="amount col-md-1 text-center border d-flex flex-column ">
+                                <input type="text" v-model="book.amount" @keyup="compareAmount(book.ProduktID)" style="height: 50%;border-radius:10px;">
+
+                                <div class="change d-flex align-items-end">
+                                    <button class="border-1 " v-on:click="add(book.ProduktID)"><i class="fas fa-plus " style="color: black;"></i></button>
+                                    <button class="border-1 " v-on:click="reduce(book.ProduktID)"><i class="fas fa-minus" style="color: black;"></i></button>
+                                </div>
+                            </div>
+                            <div class="add col-md-1 border text-center">
+                                <button v-on:click="addToCart(book.ProduktID)" style="font-size: 0.9em;background-color:  #b6c1c1;border : 0px;color: #395858"><i class="fas fa-cart-plus fa-2x "></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="bestellung  container" style="position: absolute;background-color:  #b6c1c1;" :style="isShoppingCart">
+                <div class="item" v-for="book in books">
+                    <div v-if="book.quantity > 0">
+                        <div class="row m-0">
+                            <div class=" img col-md-2 border d-flex">
+                                <img v-bind:src="book.LinkGrafikdatei" alt="" style="height: 75%;width: 75%; margin: 0 auto">
+                            </div>
+                            <div class="title col-md-6 border  ">
+                                <p>{{book.Produkttitel}}</p>
+                            </div>
+                            <div class="price col-md-2 border">
+                                <p>{{book.PreisBrutto*book.quantity}} €</p>
+                            </div>
+                            <div class="amount col-md-1 text-center border d-flex flex-column ">
+                                <input type="text" v-model="book.quantity" @keyup="compareAmount(book.ProduktID)" style="height: 50%;border-radius:10px;">
+
+                                <div class="change d-flex align-items-end">
+                                    <button class="border-1 " v-on:click="add1(book.ProduktID)"><i class="fas fa-plus " style="color: black;"></i></button>
+                                    <button class="border-1 " v-on:click="reduce1(book.ProduktID)"><i class="fas fa-minus" style="color: black;"></i></button>
+                                </div>
+                            </div>
+                            <div class="add col-md-1 border text-center">
+                                <button type="button" class="btn " data-toggle="modal" data-target="#exampleModalCenter" style="background-color: #637b7b;">
+                                    Remove
+                                  </button>
+
+                                <!-- Modal -->
+                                <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="false">
+                                    <div class="modal-dialog modal-dialog-centered" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                          </button>
+                                            </div>
+                                            <div class="modal-body">
+                                                Are you sure ???
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                <button type="button" class="btn btn-primary" data-dismiss="modal" v-on:click="remove(book.ProduktID)">OK</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <Label>Total:{{total}}€</Label><br>
+                <button v-on:click="backToCatalog()">Back to Catalog</button>
+                <button v-on:click="fetchCheckOutData()"><a href="https://iws107.informatik.htw-dresden.de/ewa/G05/admin/beleg/stripe/stripe_redirect.php">Checkout</a></button>
+
+
+            </div>
+
+
+
+        </div>
+
+    </div>
+
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/vue@next"></script>
+    <script src="katalog.js"></script>
+</body>
+
+</html>
